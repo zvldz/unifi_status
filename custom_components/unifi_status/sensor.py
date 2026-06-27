@@ -4,6 +4,8 @@ Support for Unifi Status Units.
 from __future__ import annotations
 
 import logging
+import requests
+from homeassistant.exceptions import PlatformNotReady
 from pprint import pprint
 from pprint import pformat
 import voluptuous as vol
@@ -109,9 +111,9 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
             site_id=site_id,
             ssl_verify=verify_ssl,
         )
-    except APIError as ex:
-        _LOGGER.error(f"Failed to connect to Unifi Controler: {ex}")
-        return False
+    except (APIError, requests.exceptions.RequestException) as ex:
+        _LOGGER.warning(f"Unifi Controller not ready, will retry: {ex}")
+        raise PlatformNotReady from ex
 
     for sensor in config.get(CONF_MONITORED_CONDITIONS):
         add_entities([UnifiStatusSensor(hass, ctrl, name, sensor)], True)
@@ -167,6 +169,8 @@ class UnifiStatusSensor(Entity):
                 for index, alert in enumerate(unarchived_alerts, start=1):
                     if not alert["archived"]:
                         self._attributes[str(index)] = alert
+                    if index > 19:
+                        break
 
                 self._state = len(self._attributes)
 

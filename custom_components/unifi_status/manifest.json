@@ -3,7 +3,7 @@
         "name": "UniFi Status",
         "documentation": "https://github.com/zvldz/unifi_status",
         "requirements": ["pyunifi==2.21"],
-        "version": "0.3.8",
+        "version": "0.3.9",
         "dependencies": [],
         "codeowners": ["@jchasey", "@zvldz"]
 }
